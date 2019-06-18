@@ -1,115 +1,105 @@
 <template>
-  <div class="page-wrap">
-    <el-breadcrumb separator="/" class="mb">
-      <el-breadcrumb-item to="/admin/list">Посты</el-breadcrumb-item>
-      <el-breadcrumb-item>{{post.title}}</el-breadcrumb-item>
-    </el-breadcrumb>
-
-    <el-form
-      :model="controls"
-      :rules="rules"
-      ref="form"
-      @submit.native.prevent="onSubmit"
-    >
-      <!-- <h2>Войти в панель администратора</h2> -->
-
-      <el-form-item label="Текст в формате .md или .html" prop="text">
-        <el-input
-          type="textarea"
-          v-model.trim="controls.text"
-          resize="none"
-          :rows="10"
-        />
-      </el-form-item>
-
-      <div class="mb">
-        <small class="mr">
+  <article class="post">
+    <header class="post-header">
+      <div class="post-title">
+        <h1>Post title</h1>
+        <nuxt-link to="/">
+          <i class="el-icon-back"></i>
+        </nuxt-link>
+      </div>
+      <div class="post-info">
+        <small>
           <i class="el-icon-time"></i>
-          <span>
-            {{ new Date(post.date).toLocaleString() }}
-          </span>
+          {{ new Date().toLocaleString() }}
         </small>
-
         <small>
           <i class="el-icon-view"></i>
-          <span>{{ post.views }}</span>
+          42
         </small>
       </div>
-
-      <el-form-item>
-        <el-button
-          type="primary"
-          native-type="submit"
-          round
-          :loading="loading"
+      <div class="post-image">
+        <img
+          src="https://cdn.tripzaza.com/ru/destinations/files/2017/09/Berlin-e1505798693967.jpg"
+          alt="post image"
         >
-          Обновить
-        </el-button>
-      </el-form-item>
-    </el-form>
-  </div>
+      </div>
+    </header>
+    <main class="post-content">
+      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Autem veritatis accusantium voluptatibus accusamus quos doloremque ut in distinctio, quam delectus?</p>
+      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Autem veritatis accusantium voluptatibus accusamus quos doloremque ut in distinctio, quam delectus?</p>
+      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Autem veritatis accusantium voluptatibus accusamus quos doloremque ut in distinctio, quam delectus?</p>
+    </main>
+    <footer>
+      <app-comment-form
+        v-if="canAddComment"
+        @created="createCommentHandler"
+      />
+
+      <div class="comments" v-if="true">
+        <app-comment
+          v-for="comment in 4"
+          :key="comment"
+          :comment="comment"
+        />
+      </div>
+      <div class="text-center" v-else>Комментариев нет</div>
+    </footer>
+  </article>
 </template>
 
 <script>
+import AppComment from '@/components/main/Comment'
+import AppCommentForm from '@/components/main/CommentForm'
+
 export default {
-  layout: 'admin',
-  middleware: ['admin-auth'],
-  head() {
-    return {
-      title: `Пост | ${this.post.title}`
-    }
-  },
   validate({params}) {
     return Boolean(params.id)
   },
-  async asyncData({store, params}) {
-    const post = await store.dispatch('post/fetchAdminById', params.id)
-    return {post}
-  },
   data() {
     return {
-      loading: false,
-      controls: {
-        text: ''
-      },
-      rules: {
-        text: [
-          { required: true, message: 'Текст не должен быть пустым', trigger: 'blur' }
-        ]
-      }
+      canAddComment: true
     }
   },
   methods: {
-    onSubmit() {
-      this.$refs.form.validate(async valid => {
-        if (valid) {
-          this.loading = true
-
-          const formData = {
-            text: this.controls.text,
-            id: this.post._id
-          }
-
-          try {
-            await this.$store.dispatch('post/update', formData)
-            this.$message.success('Пост обновлен')
-            this.loading = false
-          } catch (e) {
-            this.loading = false
-          }
-        }
-      })
+    createCommentHandler() {
+      this.canAddComment = false
     }
-  }
+  },
+  components: {AppComment, AppCommentForm}
 }
 </script>
 
 <style lang="scss" scoped>
-  .page-wrap {
-    width: 600px;
+  .post {
+    max-width: 600px;
+    margin: 0 auto;
   }
 
-  .mr {
-    margin-right: 2rem;
+  .post-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .post-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .5rem;
+  }
+
+  .post-image img {
+    width: 100%;
+    height: auto;
+  }
+
+  .post-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .post-content {
+    margin-bottom: 2rem;
   }
 </style>
+
